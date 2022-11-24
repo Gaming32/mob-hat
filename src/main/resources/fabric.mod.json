@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "mob-hat",
+  "version": "${version}",
+  "name": "Mob Hat",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/mob-hat/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "io.github.gaming32.mobhat.client.MobHatClient"
+    ],
+    "main": [
+      "io.github.gaming32.mobhat.MobHat"
+    ]
+  },
+  "mixins": [
+    "mob-hat.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.10",
+    "fabric": "*",
+    "minecraft": "1.18.2"
+  }
+}
