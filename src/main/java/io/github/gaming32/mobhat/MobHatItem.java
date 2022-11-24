@@ -110,7 +110,7 @@ public class MobHatItem extends Item implements Wearable {
             entity.setHeadYaw(entity.getYaw());
             entity.setBodyYaw(entity.getYaw());
             entity.setFireTicks(entityNbt.getShort("Fire"));
-            if (nbt.contains("Air")) {
+            if (entityNbt.contains("Air")) {
                 entity.setAir(entityNbt.getShort("Air"));
             }
             entity.setInvulnerable(entityNbt.getBoolean("Invulnerable"));
