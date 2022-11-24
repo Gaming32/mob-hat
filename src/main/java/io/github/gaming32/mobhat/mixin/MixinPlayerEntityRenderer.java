@@ -21,7 +21,7 @@ public class MixinPlayerEntityRenderer {
     private static void holdLikeCrossbow(AbstractClientPlayerEntity player, Hand hand, CallbackInfoReturnable<BipedEntityModel.ArmPose> cir) {
         final ItemStack stack = player.getStackInHand(hand);
         if (stack.getItem() instanceof MobHatItem && MobHatItem.getHoldType(stack) != MobHatItem.HoldType.EMPTY) {
-            cir.setReturnValue(BipedEntityModel.ArmPose.CROSSBOW_HOLD);
+            cir.setReturnValue(BipedEntityModel.ArmPose.BLOCK);
         }
     }
 }
