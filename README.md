@@ -14,4 +14,4 @@ Picking up mobs is very easy! Simply right-click. Right-click again to place the
 
 ![Crafting recipe](images/crafting_recipe.png)
 
-<sub>Thanks to destruc7i0n for their [crafting generator](https://crafting.thedestruc7i0n.ca/) used for this image.</sub>
+<sup>Thanks to destruc7i0n for their [crafting generator](https://crafting.thedestruc7i0n.ca/) used for this image.</sup>
