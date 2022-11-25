@@ -3,11 +3,13 @@
   "id": "mob-hat",
   "version": "${version}",
   "name": "Mob Hat",
-  "description": "",
-  "authors": [],
+  "description": "Adds a hat to the game that lets you transport mobs!",
+  "authors": [
+    "Gaming32"
+  ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/mob-hat/icon.png",
+  "icon": "assets/mob_hat/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
