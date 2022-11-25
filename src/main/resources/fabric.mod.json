@@ -10,9 +10,6 @@
   "icon": "assets/mob-hat/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "io.github.gaming32.mobhat.client.MobHatClient"
-    ],
     "main": [
       "io.github.gaming32.mobhat.MobHat"
     ]
