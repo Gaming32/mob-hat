@@ -8,9 +8,7 @@ Mob Hat is a hat that lets you carry mobs inside it. It's also a very classy hat
 
 Picking up mobs is very easy! Simply right-click. Right-click again to place them down.
 
-<video autoplay loop muted>
-    <source src="images/picking_up_mobs.mp4">
-</video>
+![Picking up mobs](images/picking_up_mobs.gif)
 
 ## Crafting recipe
 
