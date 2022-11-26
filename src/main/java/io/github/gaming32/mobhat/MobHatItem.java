@@ -2,8 +2,6 @@ package io.github.gaming32.mobhat;
 
 import io.github.gaming32.mobhat.mixin.EntityAccessor;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -16,7 +14,6 @@ import net.minecraft.item.Wearable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -54,11 +51,7 @@ public class MobHatItem extends Item implements Wearable {
         if (getHoldType(stack) != HoldType.EMPTY) {
             return ActionResult.FAIL;
         }
-        if (
-            entity instanceof ClientPlayerEntity ||
-            entity instanceof OtherClientPlayerEntity ||
-            entity instanceof ServerPlayerEntity
-        ) {
+        if (entity instanceof PlayerEntity) {
             return ActionResult.FAIL;
         }
         final NbtCompound nbt = getNbt(stack);
