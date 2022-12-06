@@ -1,5 +1,6 @@
 plugins {
     id 'fabric-loom' version '1.0.12'
+    id 'io.github.juuxel.loom-quiltflower' version '1.8.0'
     id 'maven-publish'
 }
 
@@ -7,17 +8,22 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
+    mavenCentral()
+    maven {
+        url = "https://maven.quiltmc.org/repository/release"
+    }
+    maven {
+        url = "https://maven.quiltmc.org/repository/snapshot"
+    }
 }
 
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    mappings loom.layered {
+        officialMojangMappings()
+        mappings "org.quiltmc:quilt-mappings:${project.quilt_mappings}:intermediary-v2"
+    }
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.

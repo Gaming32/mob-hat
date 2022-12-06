@@ -1,6 +1,8 @@
 package io.github.gaming32.mobhat;
 
 import io.github.gaming32.mobhat.mixin.EntityAccessor;
+import net.minecraft.block.DispenserBlock;
+import net.minecraft.block.dispenser.ItemDispenserBehavior;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -20,6 +22,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.*;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +43,43 @@ public class MobHatItem extends Item implements Wearable {
 
     public MobHatItem(Settings settings) {
         super(settings);
-//        DispenserBlock.registerBehavior(); // TODO: implement dispensers
+        DispenserBlock.registerBehavior(this, new ItemDispenserBehavior() {
+            boolean playSound;
+
+            @Override
+            protected ItemStack dispenseSilently(BlockPointer pointer, ItemStack stack) {
+                final BlockPos offsetPos = pointer.getPos().offset(pointer.getBlockState().get(DispenserBlock.FACING));
+                if (getHoldType(stack) != HoldType.EMPTY) {
+                    playSound = true;
+                    spawnEntity(stack, pointer.getWorld(), offsetPos);
+                } else {
+                    playSound = false;
+                    final List<LivingEntity> entities = pointer.getWorld().getEntitiesByClass(
+                        LivingEntity.class,
+                        Box.from(BlockBox.create(offsetPos, offsetPos)),
+                        entity -> !(entity instanceof PlayerEntity)
+                    );
+                    if (!entities.isEmpty()) {
+                        pickUpEntity(stack, entities.get(0));
+                    }
+                }
+                return stack;
+            }
+
+            @Override
+            protected void playSound(BlockPointer pointer) {
+                if (playSound) {
+                    super.playSound(pointer);
+                }
+            }
+
+            @Override
+            protected void spawnParticles(BlockPointer pointer, Direction side) {
+                if (playSound) {
+                    super.spawnParticles(pointer, side);
+                }
+            }
+        });
     }
 
     @Override
@@ -54,14 +93,7 @@ public class MobHatItem extends Item implements Wearable {
         if (entity instanceof PlayerEntity) {
             return ActionResult.FAIL;
         }
-        final NbtCompound nbt = getNbt(stack);
-        nbt.putString(HOLD_TYPE_KEY, HoldType.ENTITY.name());
-        nbt.put(ENTITY_KEY, entity.writeNbt(new NbtCompound()));
-        nbt.putString(ENTITY_TYPE_KEY, Registry.ENTITY_TYPE.getId(entity.getType()).toString());
-        if (entity.hasCustomName()) {
-            nbt.putString(CUSTOM_NAME_KEY, Text.Serializer.toJson(entity.getCustomName()));
-        }
-        entity.discard();
+        pickUpEntity(stack, entity);
         user.setStackInHand(hand, stack);
         return ActionResult.SUCCESS;
     }
@@ -75,55 +107,65 @@ public class MobHatItem extends Item implements Wearable {
             return ActionResult.FAIL;
         }
         if (getHoldType(context.getStack()) == HoldType.ENTITY) {
-            final NbtCompound nbt = getNbt(context.getStack());
-            nbt.putString(HOLD_TYPE_KEY, HoldType.EMPTY.name());
-            final NbtCompound entityNbt = nbt.getCompound(ENTITY_KEY);
-            nbt.remove(ENTITY_KEY);
-            final EntityType<?> entityType = Registry.ENTITY_TYPE.get(new Identifier(nbt.getString(ENTITY_TYPE_KEY)));
-            nbt.remove(ENTITY_TYPE_KEY);
-            final Text customName = nbt.contains(CUSTOM_NAME_KEY, NbtElement.STRING_TYPE)
-                ? Text.Serializer.fromJson(nbt.getString(CUSTOM_NAME_KEY))
-                : null;
-            if (customName != null) {
-                nbt.remove(CUSTOM_NAME_KEY);
-            }
-            final Entity entity = entityType.spawn(
+            spawnEntity(
+                context.getStack(),
                 (ServerWorld)context.getWorld(),
-                null,
-                customName,
-                null,
-                context.getBlockPos().offset(context.getSide()),
-                SpawnReason.BUCKET,
-                true,
-                false
+                context.getBlockPos().offset(context.getSide())
             );
-            //noinspection ConstantConditions
-            entity.setYaw(entityNbt.getList("Rotation", NbtElement.FLOAT_TYPE).getFloat(0));
-            entity.setPitch(entityNbt.getList("Rotation", NbtElement.FLOAT_TYPE).getFloat(1));
-            entity.setHeadYaw(entity.getYaw());
-            entity.setBodyYaw(entity.getYaw());
-            entity.setFireTicks(entityNbt.getShort("Fire"));
-            if (entityNbt.contains("Air")) {
-                entity.setAir(entityNbt.getShort("Air"));
-            }
-            entity.setInvulnerable(entityNbt.getBoolean("Invulnerable"));
-            entity.setCustomNameVisible(entityNbt.getBoolean("CustomNameVisible"));
-            entity.setSilent(entityNbt.getBoolean("Silent"));
-            entity.setNoGravity(entityNbt.getBoolean("NoGravity"));
-            entity.setGlowing(entityNbt.getBoolean("Glowing"));
-            entity.setFrozenTicks(entityNbt.getInt("TicksFrozen"));
-            if (entityNbt.contains("Tags", NbtElement.LIST_TYPE)) {
-                entity.getScoreboardTags().clear();
-                NbtList nbtList4 = nbt.getList("Tags", NbtElement.STRING_TYPE);
-                int i = Math.min(nbtList4.size(), 1024);
-
-                for(int j = 0; j < i; ++j) {
-                    entity.getScoreboardTags().add(nbtList4.getString(j));
-                }
-            }
-            ((EntityAccessor)entity).readCustomDataFromNbt(entityNbt);
         }
         return ActionResult.SUCCESS;
+    }
+
+    public static void pickUpEntity(ItemStack stack, LivingEntity entity) {
+        final NbtCompound nbt = getNbt(stack);
+        nbt.putString(HOLD_TYPE_KEY, HoldType.ENTITY.name());
+        nbt.put(ENTITY_KEY, entity.writeNbt(new NbtCompound()));
+        nbt.putString(ENTITY_TYPE_KEY, Registry.ENTITY_TYPE.getId(entity.getType()).toString());
+        if (entity.hasCustomName()) {
+            nbt.putString(CUSTOM_NAME_KEY, Text.Serializer.toJson(entity.getCustomName()));
+        }
+        entity.discard();
+    }
+
+    public static void spawnEntity(ItemStack stack, ServerWorld world, BlockPos pos) {
+        final NbtCompound nbt = getNbt(stack);
+        nbt.putString(HOLD_TYPE_KEY, HoldType.EMPTY.name());
+        final NbtCompound entityNbt = nbt.getCompound(ENTITY_KEY);
+        nbt.remove(ENTITY_KEY);
+        final EntityType<?> entityType = Registry.ENTITY_TYPE.get(new Identifier(nbt.getString(ENTITY_TYPE_KEY)));
+        nbt.remove(ENTITY_TYPE_KEY);
+        final Text customName = nbt.contains(CUSTOM_NAME_KEY, NbtElement.STRING_TYPE)
+            ? Text.Serializer.fromJson(nbt.getString(CUSTOM_NAME_KEY))
+            : null;
+        if (customName != null) {
+            nbt.remove(CUSTOM_NAME_KEY);
+        }
+        final Entity entity = entityType.spawn(world, null, customName, null, pos, SpawnReason.BUCKET, true, false);
+        //noinspection ConstantConditions
+        entity.setYaw(entityNbt.getList("Rotation", NbtElement.FLOAT_TYPE).getFloat(0));
+        entity.setPitch(entityNbt.getList("Rotation", NbtElement.FLOAT_TYPE).getFloat(1));
+        entity.setHeadYaw(entity.getYaw());
+        entity.setBodyYaw(entity.getYaw());
+        entity.setFireTicks(entityNbt.getShort("Fire"));
+        if (entityNbt.contains("Air")) {
+            entity.setAir(entityNbt.getShort("Air"));
+        }
+        entity.setInvulnerable(entityNbt.getBoolean("Invulnerable"));
+        entity.setCustomNameVisible(entityNbt.getBoolean("CustomNameVisible"));
+        entity.setSilent(entityNbt.getBoolean("Silent"));
+        entity.setNoGravity(entityNbt.getBoolean("NoGravity"));
+        entity.setGlowing(entityNbt.getBoolean("Glowing"));
+        entity.setFrozenTicks(entityNbt.getInt("TicksFrozen"));
+        if (entityNbt.contains("Tags", NbtElement.LIST_TYPE)) {
+            entity.getScoreboardTags().clear();
+            NbtList nbtList4 = nbt.getList("Tags", NbtElement.STRING_TYPE);
+            int i = Math.min(nbtList4.size(), 1024);
+
+            for(int j = 0; j < i; ++j) {
+                entity.getScoreboardTags().add(nbtList4.getString(j));
+            }
+        }
+        ((EntityAccessor)entity).readCustomDataFromNbt(entityNbt);
     }
 
     public static HoldType getHoldType(ItemStack stack) {
