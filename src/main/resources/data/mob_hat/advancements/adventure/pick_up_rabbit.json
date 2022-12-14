@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:adventure/root",
+  "display": {
+    "icon": {
+      "item": "mob_hat:mob_hat"
+    },
+    "title": {
+      "translate": "advancements.adventure.pick_up_rabbit.title"
+    },
+    "description": {
+      "translate": "advancements.adventure.pick_up_rabbit.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "pick_up_rabbit": {
+      "trigger": "mob_hat:mob_hat",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:rabbit"
+        }
+      }
+    }
+  }
+}

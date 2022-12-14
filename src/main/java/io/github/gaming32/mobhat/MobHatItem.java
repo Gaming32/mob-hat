@@ -16,6 +16,7 @@ import net.minecraft.item.Wearable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -93,6 +94,7 @@ public class MobHatItem extends Item implements Wearable {
         if (entity instanceof PlayerEntity) {
             return ActionResult.FAIL;
         }
+        MobHat.MOB_HAT_CRITERION.trigger((ServerPlayerEntity)user, entity);
         pickUpEntity(stack, entity);
         user.setStackInHand(hand, stack);
         return ActionResult.SUCCESS;

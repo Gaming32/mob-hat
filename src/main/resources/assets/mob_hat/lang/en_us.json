@@ -1,4 +1,8 @@
 {
   "item.mob_hat.mob_hat": "Mob Hat",
-  "item.mob_hat.mob_hat.entity": "Entity:"
+  "item.mob_hat.mob_hat.entity": "Entity:",
+  "advancements.adventure.pick_up_rabbit.title": "Abracadabra",
+  "advancements.adventure.pick_up_rabbit.description": "Pick up a rabbit with a magic hat",
+  "advancements.adventure.pick_up_wither.title": "Where are you going with that?",
+  "advancements.adventure.pick_up_wither.description": "Pick up The Wither using a magic hat"
 }
