@@ -19,7 +19,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -194,6 +193,6 @@ public class MobHatItem extends Item implements Wearable {
         } else {
             entityName = Registry.ENTITY_TYPE.get(new Identifier(nbt.getString(ENTITY_TYPE_KEY))).getName();
         }
-        tooltip.add(new TranslatableText("item.mob_hat.mob_hat.entity").append(" ").append(entityName));
+        tooltip.add(Text.translatable("item.mob_hat.mob_hat.entity").append(" ").append(entityName));
     }
 }
